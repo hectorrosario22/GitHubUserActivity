@@ -1,8 +1,8 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using GitHubUserActivity.Interfaces;
 using GitHubUserActivity.Models;
-using Microsoft.Extensions.Options;
 
 namespace GitHubUserActivity.Services;
 

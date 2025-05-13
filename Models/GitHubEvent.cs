@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace GitHubUserActivity.Models;
@@ -15,5 +16,5 @@ public record GitHubEvent
     public required GitHubEventRepo Repository { get; init; }
 
     [JsonPropertyName("payload")]
-    public object? Payload { get; init; } // TODO: Define a specific type for Payload based on the event type
+    public JsonDocument? Payload { get; init; }
 }
