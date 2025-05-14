@@ -1,12 +1,13 @@
 ﻿using GitHubUserActivity.Interfaces;
 using GitHubUserActivity.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
 
 var serviceProvider = BuildServiceProvider();
 var gitHubApiService = serviceProvider.GetRequiredService<IGitHubApiService>();
 var printService = serviceProvider.GetRequiredService<IPrintService>();
 
+// TODO: Add command line arguments to get the username
 var events = await gitHubApiService.GetEvents("hectorrosario22");
 printService.PrintEvents(events);
 
@@ -14,10 +15,22 @@ static ServiceProvider BuildServiceProvider()
 {
     var services = new ServiceCollection();
 
-    services.AddHttpClient("GitHubApi", client =>
+    services.AddSingleton<IConfiguration>(provider =>
     {
-        client.BaseAddress = new Uri("https://api.github.com/"); // TODO: Move to config
-        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
+        return new ConfigurationBuilder()
+            .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+            .Build();
+    });
+
+    services.AddHttpClient("GitHubApi", (sp, client) =>
+    {
+        var config = sp.GetRequiredService<IConfiguration>();
+        var baseUrl = config["GitHubApi:BaseUrl"]
+            ?? throw new InvalidOperationException("GitHub API BaseUrl not configured");
+
+        client.BaseAddress = new Uri(baseUrl);
+        client.DefaultRequestHeaders.UserAgent.ParseAdd("GitHubUserActivity/1.0");
     });
     services.AddScoped<IGitHubApiService, GitHubApiService>();
     services.AddScoped<IPrintService, PrintService>();
