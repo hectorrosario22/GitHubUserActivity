@@ -12,6 +12,9 @@ public class PrintService : IPrintService
         {
             switch (gitHubEvent.Type)
             {
+                case GitHubEventType.CommitCommentEvent:
+                    PrintCommitCommentEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -27,11 +30,27 @@ public class PrintService : IPrintService
             }
         }
     }
+    
+    private static void PrintCommitCommentEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+        
+        var commitCommentEventPayload = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
+        if (commitCommentEventPayload is null) return;
+
+        var prefixLabel = commitCommentEventPayload.Action switch
+        {
+            GitHubCommitCommentAction.Created => "Created a commit comment",
+            _ => "Unknown commit comment action"
+        };
+
+        Console.WriteLine($"- {prefixLabel} in {gitHubEvent.Repository.Name}");
+    }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        
+
         var pushEvent = gitHubEvent.Payload.Deserialize<GitHubPushEventPayload>();
         if (pushEvent is null) return;
 

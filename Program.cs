@@ -8,7 +8,7 @@ var gitHubApiService = serviceProvider.GetRequiredService<IGitHubApiService>();
 var printService = serviceProvider.GetRequiredService<IPrintService>();
 
 // TODO: Add command line arguments to get the username
-var events = await gitHubApiService.GetEvents("testcontainers");
+var events = await gitHubApiService.GetEvents("hectorrosario22");
 printService.PrintEvents(events);
 
 static ServiceProvider BuildServiceProvider()

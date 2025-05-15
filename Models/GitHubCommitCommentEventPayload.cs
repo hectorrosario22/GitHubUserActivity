@@ -2,9 +2,9 @@ using System.Text.Json.Serialization;
 
 namespace GitHubUserActivity.Models;
 
-public class GitHubWatchEventPayload
+public class GitHubCommitCommentEventPayload
 {
     [JsonPropertyName("action")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public required GitHubWatchAction Action { get; init; }
+    public required GitHubCommitCommentAction Action { get; init; }
 }
