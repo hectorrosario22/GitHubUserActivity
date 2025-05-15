@@ -18,6 +18,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.IssuesEvent:
                     PrintIssueEvent(gitHubEvent);
                     break;
+                case GitHubEventType.WatchEvent:
+                    PrintWatchEvent(gitHubEvent);
+                    break;
                 default:
                     Console.WriteLine("- Not implemented event type");
                     break;
@@ -57,5 +60,21 @@ public class PrintService : IPrintService
         };
 
         Console.WriteLine($"- {prefixLabel} in {gitHubEvent.Repository.Name}");
+    }
+
+    private static void PrintWatchEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+        
+        var watchEvent = gitHubEvent.Payload.Deserialize<GitHubWatchEventPayload>();
+        if (watchEvent is null) return;
+
+        var prefixLabel = watchEvent.Action switch
+        {
+            GitHubWatchAction.Started => "Starred",
+            _ => "Unknown watch action"
+        };
+
+        Console.WriteLine($"- {prefixLabel} {gitHubEvent.Repository.Name}");
     }
 }
