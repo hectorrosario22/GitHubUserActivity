@@ -18,6 +18,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.CreateEvent:
                     PrintCreateEvent(gitHubEvent);
                     break;
+                case GitHubEventType.DeleteEvent:
+                    PrintDeleteEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -62,6 +65,22 @@ public class PrintService : IPrintService
             GitHubRefType.Branch or GitHubRefType.Tag => $"- {createEvent.RefType} '{createEvent.Ref}' created in {gitHubEvent.Repository.Name}",
             GitHubRefType.Repository => $"- {createEvent.RefType} '{gitHubEvent.Repository.Name}' created",
             _ => "Unknown create event action"
+        };
+
+        Console.WriteLine(message);
+    }
+
+    private static void PrintDeleteEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+        
+        var deleteEvent = gitHubEvent.Payload.Deserialize<GitHubDeleteEventPayload>();
+        if (deleteEvent is null) return;
+
+        var message = deleteEvent.RefType switch
+        {
+            GitHubRefType.Branch or GitHubRefType.Tag => $"- {deleteEvent.RefType} '{deleteEvent.Ref}' deleted from {gitHubEvent.Repository.Name}",
+            _ => "Unknown delete event action"
         };
 
         Console.WriteLine(message);
