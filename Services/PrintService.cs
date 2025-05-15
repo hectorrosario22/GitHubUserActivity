@@ -15,6 +15,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.CommitCommentEvent:
                     PrintCommitCommentEvent(gitHubEvent);
                     break;
+                case GitHubEventType.CreateEvent:
+                    PrintCreateEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -35,16 +38,33 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
         
-        var commitCommentEventPayload = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
-        if (commitCommentEventPayload is null) return;
+        var commitCommentEvent = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
+        if (commitCommentEvent is null) return;
 
-        var prefixLabel = commitCommentEventPayload.Action switch
+        var prefixLabel = commitCommentEvent.Action switch
         {
             GitHubCommitCommentAction.Created => "Created a commit comment",
             _ => "Unknown commit comment action"
         };
 
         Console.WriteLine($"- {prefixLabel} in {gitHubEvent.Repository.Name}");
+    }
+
+    private static void PrintCreateEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+        
+        var createEvent = gitHubEvent.Payload.Deserialize<GitHubCreateEventPayload>();
+        if (createEvent is null) return;
+
+        var message = createEvent.RefType switch
+        {
+            GitHubRefType.Branch or GitHubRefType.Tag => $"- {createEvent.RefType} '{createEvent.Ref}' created in {gitHubEvent.Repository.Name}",
+            GitHubRefType.Repository => $"- {createEvent.RefType} '{gitHubEvent.Repository.Name}' created",
+            _ => "Unknown create event action"
+        };
+
+        Console.WriteLine(message);
     }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
