@@ -21,6 +21,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.DeleteEvent:
                     PrintDeleteEvent(gitHubEvent);
                     break;
+                case GitHubEventType.ForkEvent:
+                    PrintForkEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -36,11 +39,11 @@ public class PrintService : IPrintService
             }
         }
     }
-    
+
     private static void PrintCommitCommentEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        
+
         var commitCommentEvent = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
         if (commitCommentEvent is null) return;
 
@@ -56,7 +59,7 @@ public class PrintService : IPrintService
     private static void PrintCreateEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        
+
         var createEvent = gitHubEvent.Payload.Deserialize<GitHubCreateEventPayload>();
         if (createEvent is null) return;
 
@@ -73,7 +76,7 @@ public class PrintService : IPrintService
     private static void PrintDeleteEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        
+
         var deleteEvent = gitHubEvent.Payload.Deserialize<GitHubDeleteEventPayload>();
         if (deleteEvent is null) return;
 
@@ -84,6 +87,12 @@ public class PrintService : IPrintService
         };
 
         Console.WriteLine(message);
+    }
+
+    private static void PrintForkEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+        Console.WriteLine($"- Forked {gitHubEvent.Repository.Name}");
     }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
@@ -100,7 +109,7 @@ public class PrintService : IPrintService
     private static void PrintIssueEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        
+
         var issueEvent = gitHubEvent.Payload.Deserialize<GitHubIssueEventPayload>();
         if (issueEvent is null) return;
 
@@ -123,7 +132,7 @@ public class PrintService : IPrintService
     private static void PrintWatchEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        
+
         var watchEvent = gitHubEvent.Payload.Deserialize<GitHubWatchEventPayload>();
         if (watchEvent is null) return;
 
