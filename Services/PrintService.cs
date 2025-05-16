@@ -24,6 +24,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.ForkEvent:
                     PrintForkEvent(gitHubEvent);
                     break;
+                case GitHubEventType.GollumEvent:
+                    PrintGollumEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -89,8 +92,36 @@ public class PrintService : IPrintService
 
     private static void PrintForkEvent(GitHubEvent gitHubEvent)
     {
-        if (gitHubEvent.Payload is null) return;
         Console.WriteLine($"- Forked '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintGollumEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+
+        var golumEvent = gitHubEvent.Payload.Deserialize<GitHubGollumEventPayload>();
+        if (golumEvent is null) return;
+
+        var createdPages = golumEvent.Pages.Count(d => d.Action == GitHubWikiPageAction.Created);
+        var editedPages = golumEvent.Pages.Count(d => d.Action == GitHubWikiPageAction.Edited);
+
+        string prefixLabel = "Unknown wiki action";
+        if (createdPages > 0 && editedPages > 0)
+        {
+            prefixLabel = $"Created {createdPages} and edited {editedPages} wiki pages";
+        }
+        else if (createdPages > 0)
+        {
+            var suffix = createdPages > 1 ? $"{createdPages} wiki pages" : "a wiki page";
+            prefixLabel = $"Created {suffix}";
+        }
+        else if (editedPages > 0)
+        {
+            var suffix = editedPages > 1 ? $"{editedPages} wiki pages" : "a wiki page";
+            prefixLabel = $"Edited {suffix}";
+        }
+
+        Console.WriteLine($"- {prefixLabel} into '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
