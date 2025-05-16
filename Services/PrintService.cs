@@ -47,13 +47,11 @@ public class PrintService : IPrintService
         var commitCommentEvent = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
         if (commitCommentEvent is null) return;
 
-        var prefixLabel = commitCommentEvent.Action switch
-        {
-            GitHubCommitCommentAction.Created => "Created a commit comment",
-            _ => "Unknown commit comment action"
-        };
+        var commitIdLabel = commitCommentEvent.Comment.CommitId.Length > 7
+            ? commitCommentEvent.Comment.CommitId[..7]
+            : commitCommentEvent.Comment.CommitId;
 
-        Console.WriteLine($"- {prefixLabel} in {gitHubEvent.Repository.Name}");
+        Console.WriteLine($"- Commented the commit '{commitIdLabel}' in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintCreateEvent(GitHubEvent gitHubEvent)
@@ -65,8 +63,8 @@ public class PrintService : IPrintService
 
         var message = createEvent.RefType switch
         {
-            GitHubRefType.Branch or GitHubRefType.Tag => $"- {createEvent.RefType} '{createEvent.Ref}' created in {gitHubEvent.Repository.Name}",
-            GitHubRefType.Repository => $"- {createEvent.RefType} '{gitHubEvent.Repository.Name}' created",
+            GitHubRefType.Branch or GitHubRefType.Tag => $"- {createEvent.RefType} '{createEvent.Ref}' created in '{gitHubEvent.Repository.Name}'",
+            GitHubRefType.Repository => $"- {createEvent.RefType} ''{gitHubEvent.Repository.Name}'' created",
             _ => "Unknown create event action"
         };
 
@@ -82,7 +80,7 @@ public class PrintService : IPrintService
 
         var message = deleteEvent.RefType switch
         {
-            GitHubRefType.Branch or GitHubRefType.Tag => $"- {deleteEvent.RefType} '{deleteEvent.Ref}' deleted from {gitHubEvent.Repository.Name}",
+            GitHubRefType.Branch or GitHubRefType.Tag => $"- {deleteEvent.RefType} '{deleteEvent.Ref}' deleted from '{gitHubEvent.Repository.Name}'",
             _ => "Unknown delete event action"
         };
 
@@ -92,7 +90,7 @@ public class PrintService : IPrintService
     private static void PrintForkEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-        Console.WriteLine($"- Forked {gitHubEvent.Repository.Name}");
+        Console.WriteLine($"- Forked '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
@@ -103,7 +101,7 @@ public class PrintService : IPrintService
         if (pushEvent is null) return;
 
         var commitLabel = pushEvent.DistinctSize == 1 ? "commit" : "commits";
-        Console.WriteLine($"- Pushed {pushEvent.DistinctSize} {commitLabel} to {gitHubEvent.Repository.Name}");
+        Console.WriteLine($"- Pushed {pushEvent.DistinctSize} {commitLabel} to '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintIssueEvent(GitHubEvent gitHubEvent)
@@ -126,7 +124,7 @@ public class PrintService : IPrintService
             _ => "Unknown issue action"
         };
 
-        Console.WriteLine($"- {prefixLabel} in {gitHubEvent.Repository.Name}");
+        Console.WriteLine($"- {prefixLabel} in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintWatchEvent(GitHubEvent gitHubEvent)
@@ -142,6 +140,6 @@ public class PrintService : IPrintService
             _ => "Unknown watch action"
         };
 
-        Console.WriteLine($"- {prefixLabel} {gitHubEvent.Repository.Name}");
+        Console.WriteLine($"- {prefixLabel} '{gitHubEvent.Repository.Name}'");
     }
 }

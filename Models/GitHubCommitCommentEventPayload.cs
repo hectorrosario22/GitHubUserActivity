@@ -4,7 +4,6 @@ namespace GitHubUserActivity.Models;
 
 public class GitHubCommitCommentEventPayload
 {
-    [JsonPropertyName("action")]
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public required GitHubCommitCommentAction Action { get; init; }
+    [JsonPropertyName("comment")]
+    public required GitHubCommitComment Comment { get; init; }
 }
