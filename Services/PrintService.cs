@@ -37,11 +37,14 @@ public class PrintService : IPrintService
                 case GitHubEventType.IssueCommentEvent:
                     PrintIssueCommentEvent(gitHubEvent);
                     break;
-                case GitHubEventType.PushEvent:
-                    PrintPushEvent(gitHubEvent);
-                    break;
                 case GitHubEventType.IssuesEvent:
                     PrintIssueEvent(gitHubEvent);
+                    break;
+                case GitHubEventType.MemberEvent:
+                    PrintMemberEvent(gitHubEvent);
+                    break;
+                case GitHubEventType.PushEvent:
+                    PrintPushEvent(gitHubEvent);
                     break;
                 case GitHubEventType.WatchEvent:
                     PrintWatchEvent(gitHubEvent);
@@ -164,17 +167,6 @@ public class PrintService : IPrintService
         Console.WriteLine(sb.ToString());
     }
 
-    private static void PrintPushEvent(GitHubEvent gitHubEvent)
-    {
-        if (gitHubEvent.Payload is null) return;
-
-        var pushEvent = gitHubEvent.Payload.Deserialize<GitHubPushEventPayload>();
-        if (pushEvent is null) return;
-
-        var commitLabel = pushEvent.Size == 1 ? "commit" : "commits";
-        Console.WriteLine($"- Pushed {pushEvent.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
-    }
-
     private static void PrintIssueEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
@@ -196,6 +188,23 @@ public class PrintService : IPrintService
         };
 
         Console.WriteLine($"- {prefixLabel} in '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintMemberEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+        Console.WriteLine($"- Added a collaborator in '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintPushEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+
+        var pushEvent = gitHubEvent.Payload.Deserialize<GitHubPushEventPayload>();
+        if (pushEvent is null) return;
+
+        var commitLabel = pushEvent.Size == 1 ? "commit" : "commits";
+        Console.WriteLine($"- Pushed {pushEvent.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintWatchEvent(GitHubEvent gitHubEvent)
