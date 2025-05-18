@@ -201,16 +201,6 @@ public class PrintService : IPrintService
     private static void PrintWatchEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
-
-        var watchEvent = gitHubEvent.Payload.Deserialize<GitHubWatchEventPayload>();
-        if (watchEvent is null) return;
-
-        var prefixLabel = watchEvent.Action switch
-        {
-            GitHubWatchAction.Started => "Starred",
-            _ => "Unknown watch action"
-        };
-
-        Console.WriteLine($"- {prefixLabel} '{gitHubEvent.Repository.Name}'");
+        Console.WriteLine($"- Starred '{gitHubEvent.Repository.Name}'");
     }
 }
