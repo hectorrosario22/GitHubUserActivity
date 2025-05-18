@@ -1,3 +1,5 @@
+using System.Runtime.Serialization;
+
 namespace GitHubUserActivity.Models;
 
 public enum GitHubPullRequestAction
@@ -8,7 +10,9 @@ public enum GitHubPullRequestAction
     Reopened,
     Assigned,
     Unassigned,
+    [EnumMember(Value = "review_requested")]
     ReviewRequested,
+    [EnumMember(Value = "review_request_removed")]
     ReviewRequestRemoved,
     Labeled,
     Unlabeled,
