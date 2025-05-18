@@ -72,12 +72,12 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var commitCommentEvent = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
-        if (commitCommentEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubCommitCommentEventPayload>();
+        if (payload is null) return;
 
-        var commitIdLabel = commitCommentEvent.Comment.CommitId.Length > 7
-            ? commitCommentEvent.Comment.CommitId[..7]
-            : commitCommentEvent.Comment.CommitId;
+        var commitIdLabel = payload.Comment.CommitId.Length > 7
+            ? payload.Comment.CommitId[..7]
+            : payload.Comment.CommitId;
 
         Console.WriteLine($"- Commented the commit '{commitIdLabel}' in '{gitHubEvent.Repository.Name}'");
     }
@@ -86,13 +86,13 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var createEvent = gitHubEvent.Payload.Deserialize<GitHubCreateEventPayload>();
-        if (createEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubCreateEventPayload>();
+        if (payload is null) return;
 
-        var message = createEvent.RefType switch
+        var message = payload.RefType switch
         {
-            GitHubRefType.Branch or GitHubRefType.Tag => $"- {createEvent.RefType} '{createEvent.Ref}' created in '{gitHubEvent.Repository.Name}'",
-            GitHubRefType.Repository => $"- {createEvent.RefType} '{gitHubEvent.Repository.Name}' created",
+            GitHubRefType.Branch or GitHubRefType.Tag => $"- {payload.RefType} '{payload.Ref}' created in '{gitHubEvent.Repository.Name}'",
+            GitHubRefType.Repository => $"- {payload.RefType} '{gitHubEvent.Repository.Name}' created",
             _ => "Unknown create event action"
         };
 
@@ -103,12 +103,12 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var deleteEvent = gitHubEvent.Payload.Deserialize<GitHubDeleteEventPayload>();
-        if (deleteEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubDeleteEventPayload>();
+        if (payload is null) return;
 
-        var message = deleteEvent.RefType switch
+        var message = payload.RefType switch
         {
-            GitHubRefType.Branch or GitHubRefType.Tag => $"- {deleteEvent.RefType} '{deleteEvent.Ref}' deleted from '{gitHubEvent.Repository.Name}'",
+            GitHubRefType.Branch or GitHubRefType.Tag => $"- {payload.RefType} '{payload.Ref}' deleted from '{gitHubEvent.Repository.Name}'",
             _ => "Unknown delete event action"
         };
 
@@ -124,11 +124,11 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var golumEvent = gitHubEvent.Payload.Deserialize<GitHubGollumEventPayload>();
-        if (golumEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubGollumEventPayload>();
+        if (payload is null) return;
 
-        var createdCount = golumEvent.Pages.Count(page => page.Action == GitHubWikiPageAction.Created);
-        var editedCount = golumEvent.Pages.Count(page => page.Action == GitHubWikiPageAction.Edited);
+        var createdCount = payload.Pages.Count(page => page.Action == GitHubWikiPageAction.Created);
+        var editedCount = payload.Pages.Count(page => page.Action == GitHubWikiPageAction.Edited);
 
         string actionLabel = "Unknown wiki action";
         if (createdCount > 0 && editedCount > 0)
@@ -153,11 +153,11 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var issueCommentEvent = gitHubEvent.Payload.Deserialize<GitHubIssueCommentEventPayload>();
-        if (issueCommentEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubIssueCommentEventPayload>();
+        if (payload is null) return;
 
         StringBuilder sb = new("- ");
-        sb.Append(issueCommentEvent.Action switch
+        sb.Append(payload.Action switch
         {
             GitHubIssueCommentAction.Created => "Created ",
             GitHubIssueCommentAction.Edited => "Edited ",
@@ -166,13 +166,13 @@ public class PrintService : IPrintService
         });
         sb.Append("a comment on ");
 
-        if (issueCommentEvent.Issue.PullRequest is null)
+        if (payload.Issue.PullRequest is null)
         {
-            sb.Append($"issue #{issueCommentEvent.Issue.Number}");
+            sb.Append($"issue #{payload.Issue.Number}");
         }
         else
         {
-            sb.Append($"pull request #{issueCommentEvent.Issue.Number}");
+            sb.Append($"pull request #{payload.Issue.Number}");
         }
 
         sb.Append($" in '{gitHubEvent.Repository.Name}'");
@@ -183,10 +183,10 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var issueEvent = gitHubEvent.Payload.Deserialize<GitHubIssueEventPayload>();
-        if (issueEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubIssueEventPayload>();
+        if (payload is null) return;
 
-        var actionLabel = issueEvent.Action switch
+        var actionLabel = payload.Action switch
         {
             GitHubIssueAction.Opened => "Opened a new issue",
             GitHubIssueAction.Edited => "Edited an issue",
@@ -216,21 +216,21 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var pushEvent = gitHubEvent.Payload.Deserialize<GitHubPushEventPayload>();
-        if (pushEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubPushEventPayload>();
+        if (payload is null) return;
 
-        var commitLabel = pushEvent.Size == 1 ? "commit" : "commits";
-        Console.WriteLine($"- Pushed {pushEvent.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
+        var commitLabel = payload.Size == 1 ? "commit" : "commits";
+        Console.WriteLine($"- Pushed {payload.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintPullRequestEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
 
-        var pullRequestEvent = gitHubEvent.Payload.Deserialize<GitHubPullRequestEventPayload>();
-        if (pullRequestEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubPullRequestEventPayload>();
+        if (payload is null) return;
 
-        var actionLabel = pullRequestEvent.Action switch
+        var actionLabel = payload.Action switch
         {
             GitHubPullRequestAction.Opened => "Opened a pull request",
             GitHubPullRequestAction.Edited => "Edited a pull request",
@@ -253,20 +253,20 @@ public class PrintService : IPrintService
     {
         if (gitHubEvent.Payload is null) return;
 
-        var pullRequestReviewEvent = gitHubEvent.Payload.Deserialize<GitHubPullRequestReviewEventPayload>();
-        if (pullRequestReviewEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubPullRequestReviewEventPayload>();
+        if (payload is null) return;
 
-        Console.WriteLine($"- Requested a review for pull request #{pullRequestReviewEvent.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
+        Console.WriteLine($"- Requested a review for pull request #{payload.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintPullRequestReviewCommentEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
 
-        var pullRequestReviewCommentEvent = gitHubEvent.Payload.Deserialize<GitHubPullRequestReviewCommentEventPayload>();
-        if (pullRequestReviewCommentEvent is null) return;
+        var payload = gitHubEvent.Payload.Deserialize<GitHubPullRequestReviewCommentEventPayload>();
+        if (payload is null) return;
 
-        Console.WriteLine($"- Commented on pull request #{pullRequestReviewCommentEvent.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
+        Console.WriteLine($"- Commented on pull request #{payload.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintWatchEvent(GitHubEvent gitHubEvent)
