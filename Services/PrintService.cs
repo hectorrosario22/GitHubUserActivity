@@ -49,6 +49,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.PullRequestEvent:
                     PrintPullRequestEvent(gitHubEvent);
                     break;
+                case GitHubEventType.PullRequestReviewEvent:
+                    PrintPullRequestReviewEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -241,6 +244,16 @@ public class PrintService : IPrintService
         };
 
         Console.WriteLine($"- {actionLabel} in '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintPullRequestReviewEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+
+        var pullRequestReviewEvent = gitHubEvent.Payload.Deserialize<GitHubPullRequestReviewEventPayload>();
+        if (pullRequestReviewEvent is null) return;
+
+        Console.WriteLine($"- Requested a review for pull request #{pullRequestReviewEvent.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintWatchEvent(GitHubEvent gitHubEvent)
