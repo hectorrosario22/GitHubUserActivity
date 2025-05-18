@@ -55,6 +55,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.PullRequestReviewCommentEvent:
                     PrintPullRequestReviewCommentEvent(gitHubEvent);
                     break;
+                case GitHubEventType.PullRequestReviewThreadEvent:
+                    PrintPullRequestReviewThreadEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -257,6 +260,23 @@ public class PrintService : IPrintService
         if (payload is null) return;
 
         Console.WriteLine($"- Requested a review for pull request #{payload.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintPullRequestReviewThreadEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+
+        var payload = gitHubEvent.Payload.Deserialize<GitHubPullRequestReviewThreadEventPayload>();
+        if (payload is null) return;
+
+        var actionLabel = payload.Action switch
+        {
+            GitHubThreadAction.Resolved => "Resolved a review thread",
+            GitHubThreadAction.Unresolved => "Unresolved a review thread",
+            _ => "Unknown review thread action"
+        };
+
+        Console.WriteLine($"- {actionLabel} for pull request #{payload.PullRequest.Number} in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintPullRequestReviewCommentEvent(GitHubEvent gitHubEvent)
