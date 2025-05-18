@@ -8,6 +8,12 @@ public class PrintService : IPrintService
 {
     public void PrintEvents(List<GitHubEvent> events)
     {
+        if (events is null || events.Count == 0)
+        {
+            Console.WriteLine("No events found.");
+            return;
+        }
+
         foreach (var gitHubEvent in events)
         {
             switch (gitHubEvent.Type)
