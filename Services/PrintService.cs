@@ -43,6 +43,12 @@ public class PrintService : IPrintService
                 case GitHubEventType.MemberEvent:
                     PrintMemberEvent(gitHubEvent);
                     break;
+                case GitHubEventType.PublicEvent:
+                    PrintPublicEvent(gitHubEvent);
+                    break;
+                case GitHubEventType.PullRequestEvent:
+                    PrintPullRequestEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
@@ -80,7 +86,7 @@ public class PrintService : IPrintService
         var message = createEvent.RefType switch
         {
             GitHubRefType.Branch or GitHubRefType.Tag => $"- {createEvent.RefType} '{createEvent.Ref}' created in '{gitHubEvent.Repository.Name}'",
-            GitHubRefType.Repository => $"- {createEvent.RefType} ''{gitHubEvent.Repository.Name}'' created",
+            GitHubRefType.Repository => $"- {createEvent.RefType} '{gitHubEvent.Repository.Name}' created",
             _ => "Unknown create event action"
         };
 
@@ -115,26 +121,26 @@ public class PrintService : IPrintService
         var golumEvent = gitHubEvent.Payload.Deserialize<GitHubGollumEventPayload>();
         if (golumEvent is null) return;
 
-        var createdPages = golumEvent.Pages.Count(d => d.Action == GitHubWikiPageAction.Created);
-        var editedPages = golumEvent.Pages.Count(d => d.Action == GitHubWikiPageAction.Edited);
+        var createdCount = golumEvent.Pages.Count(page => page.Action == GitHubWikiPageAction.Created);
+        var editedCount = golumEvent.Pages.Count(page => page.Action == GitHubWikiPageAction.Edited);
 
-        string prefixLabel = "Unknown wiki action";
-        if (createdPages > 0 && editedPages > 0)
+        string actionLabel = "Unknown wiki action";
+        if (createdCount > 0 && editedCount > 0)
         {
-            prefixLabel = $"Created {createdPages} and edited {editedPages} wiki pages";
+            actionLabel = $"Created {createdCount} and edited {editedCount} wiki pages";
         }
-        else if (createdPages > 0)
+        else if (createdCount > 0)
         {
-            var suffix = createdPages > 1 ? $"{createdPages} wiki pages" : "a wiki page";
-            prefixLabel = $"Created {suffix}";
+            var suffix = createdCount > 1 ? $"{createdCount} wiki pages" : "a wiki page";
+            actionLabel = $"Created {suffix}";
         }
-        else if (editedPages > 0)
+        else if (editedCount > 0)
         {
-            var suffix = editedPages > 1 ? $"{editedPages} wiki pages" : "a wiki page";
-            prefixLabel = $"Edited {suffix}";
+            var suffix = editedCount > 1 ? $"{editedCount} wiki pages" : "a wiki page";
+            actionLabel = $"Edited {suffix}";
         }
 
-        Console.WriteLine($"- {prefixLabel} into '{gitHubEvent.Repository.Name}'");
+        Console.WriteLine($"- {actionLabel} into '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintIssueCommentEvent(GitHubEvent gitHubEvent)
@@ -174,7 +180,7 @@ public class PrintService : IPrintService
         var issueEvent = gitHubEvent.Payload.Deserialize<GitHubIssueEventPayload>();
         if (issueEvent is null) return;
 
-        var prefixLabel = issueEvent.Action switch
+        var actionLabel = issueEvent.Action switch
         {
             GitHubIssueAction.Opened => "Opened a new issue",
             GitHubIssueAction.Edited => "Edited an issue",
@@ -187,13 +193,17 @@ public class PrintService : IPrintService
             _ => "Unknown issue action"
         };
 
-        Console.WriteLine($"- {prefixLabel} in '{gitHubEvent.Repository.Name}'");
+        Console.WriteLine($"- {actionLabel} in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintMemberEvent(GitHubEvent gitHubEvent)
     {
-        if (gitHubEvent.Payload is null) return;
         Console.WriteLine($"- Added a collaborator in '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintPublicEvent(GitHubEvent gitHubEvent)
+    {
+        Console.WriteLine($"- Made '{gitHubEvent.Repository.Name}' public");
     }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
@@ -207,9 +217,34 @@ public class PrintService : IPrintService
         Console.WriteLine($"- Pushed {pushEvent.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
     }
 
-    private static void PrintWatchEvent(GitHubEvent gitHubEvent)
+    private static void PrintPullRequestEvent(GitHubEvent gitHubEvent)
     {
         if (gitHubEvent.Payload is null) return;
+
+        var pullRequestEvent = gitHubEvent.Payload.Deserialize<GitHubPullRequestEventPayload>();
+        if (pullRequestEvent is null) return;
+
+        var actionLabel = pullRequestEvent.Action switch
+        {
+            GitHubPullRequestAction.Opened => "Opened a pull request",
+            GitHubPullRequestAction.Edited => "Edited a pull request",
+            GitHubPullRequestAction.Closed => "Closed a pull request",
+            GitHubPullRequestAction.Reopened => "Reopened a pull request",
+            GitHubPullRequestAction.Assigned => "Assigned a pull request",
+            GitHubPullRequestAction.Unassigned => "Unassigned a pull request",
+            GitHubPullRequestAction.ReviewRequested => "Requested a review for a pull request",
+            GitHubPullRequestAction.ReviewRequestRemoved => "Removed a review request for a pull request",
+            GitHubPullRequestAction.Labeled => "Labeled a pull request",
+            GitHubPullRequestAction.Unlabeled => "Unlabeled a pull request",
+            GitHubPullRequestAction.Synchronize => "Synchronized a pull request",
+            _ => "Unknown pull request action"
+        };
+
+        Console.WriteLine($"- {actionLabel} in '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintWatchEvent(GitHubEvent gitHubEvent)
+    {
         Console.WriteLine($"- Starred '{gitHubEvent.Repository.Name}'");
     }
 }
