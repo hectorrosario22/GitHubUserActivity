@@ -171,8 +171,8 @@ public class PrintService : IPrintService
         var pushEvent = gitHubEvent.Payload.Deserialize<GitHubPushEventPayload>();
         if (pushEvent is null) return;
 
-        var commitLabel = pushEvent.DistinctSize == 1 ? "commit" : "commits";
-        Console.WriteLine($"- Pushed {pushEvent.DistinctSize} {commitLabel} to '{gitHubEvent.Repository.Name}'");
+        var commitLabel = pushEvent.Size == 1 ? "commit" : "commits";
+        Console.WriteLine($"- Pushed {pushEvent.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintIssueEvent(GitHubEvent gitHubEvent)

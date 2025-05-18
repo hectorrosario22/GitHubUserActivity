@@ -5,7 +5,7 @@ namespace GitHubUserActivity.Models;
 public class GitHubIssue
 {
     [JsonPropertyName("number")]
-    public required int Number { get; init; }
+    public required long Number { get; init; }
     
     [JsonPropertyName("pull_request")]
     public object? PullRequest { get; init; }
