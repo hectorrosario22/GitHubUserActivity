@@ -1,3 +1,4 @@
+using System.Text;
 using System.Text.Json;
 using GitHubUserActivity.Interfaces;
 using GitHubUserActivity.Models;
@@ -32,6 +33,9 @@ public class PrintService : IPrintService
                     break;
                 case GitHubEventType.GollumEvent:
                     PrintGollumEvent(gitHubEvent);
+                    break;
+                case GitHubEventType.IssueCommentEvent:
+                    PrintIssueCommentEvent(gitHubEvent);
                     break;
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
@@ -128,6 +132,36 @@ public class PrintService : IPrintService
         }
 
         Console.WriteLine($"- {prefixLabel} into '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintIssueCommentEvent(GitHubEvent gitHubEvent)
+    {
+        if (gitHubEvent.Payload is null) return;
+
+        var issueCommentEvent = gitHubEvent.Payload.Deserialize<GitHubIssueCommentEventPayload>();
+        if (issueCommentEvent is null) return;
+
+        StringBuilder sb = new("- ");
+        sb.Append(issueCommentEvent.Action switch
+        {
+            GitHubIssueCommentAction.Created => "Created ",
+            GitHubIssueCommentAction.Edited => "Edited ",
+            GitHubIssueCommentAction.Deleted => "Deleted ",
+            _ => string.Empty
+        });
+        sb.Append("a comment on ");
+
+        if (issueCommentEvent.Issue.PullRequest is null)
+        {
+            sb.Append($"issue #{issueCommentEvent.Issue.Number}");
+        }
+        else
+        {
+            sb.Append($"pull request #{issueCommentEvent.Issue.Number}");
+        }
+
+        sb.Append($" in '{gitHubEvent.Repository.Name}'");
+        Console.WriteLine(sb.ToString());
     }
 
     private static void PrintPushEvent(GitHubEvent gitHubEvent)
