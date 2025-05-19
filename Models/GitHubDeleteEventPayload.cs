@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace GitHubUserActivity.Models;
 
-public class GitHubDeleteEventPayload
+public record GitHubDeleteEventPayload : IGitHubPayload
 {
     [JsonPropertyName("ref")]
     public required string Ref { get; set; }
@@ -10,4 +10,13 @@ public class GitHubDeleteEventPayload
     [JsonPropertyName("ref_type")]
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public required GitHubRefType RefType { get; init; }
+
+    public string ToString(GitHubEvent gitHubEvent)
+    {
+        return RefType switch
+        {
+            GitHubRefType.Branch or GitHubRefType.Tag => $"{RefType} '{Ref}' deleted from '{gitHubEvent.Repository.Name}'",
+            _ => "Unknown delete event action"
+        };
+    }
 }
