@@ -4,5 +4,5 @@ namespace GitHubUserActivity.Interfaces;
 
 public interface IGitHubApiService
 {
-    Task<List<GitHubEvent>> GetEvents(string username);
+    Task<Result<List<GitHubEvent>>> GetEvents(string username);
 }

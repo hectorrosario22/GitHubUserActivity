@@ -9,16 +9,20 @@ namespace GitHubUserActivity.Services;
 public class GitHubApiService(
     IHttpClientFactory httpClientFactory) : IGitHubApiService
 {
-    public async Task<List<GitHubEvent>> GetEvents(string username)
+    public async Task<Result<List<GitHubEvent>>> GetEvents(string username)
     {
         var client = httpClientFactory.CreateClient("GitHubApi");
         var response = await client.GetAsync($"users/{username}/events");
-        response.EnsureSuccessStatusCode();
+
+        if (!response.IsSuccessStatusCode && response.StatusCode != System.Net.HttpStatusCode.NotModified)
+        {
+            return Result<List<GitHubEvent>>.Failure($"Error {response.StatusCode} fetching events for user {username}: {response.ReasonPhrase}");
+        }
 
         var events = await response.Content.ReadFromJsonAsync<List<GitHubEvent>>(new JsonSerializerOptions
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         });
-        return events ?? [];
+        return Result<List<GitHubEvent>>.Success(events ?? []);
     }
 }

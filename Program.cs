@@ -7,9 +7,28 @@ var serviceProvider = BuildServiceProvider();
 var gitHubApiService = serviceProvider.GetRequiredService<IGitHubApiService>();
 var printService = serviceProvider.GetRequiredService<IPrintService>();
 
-// TODO: Add command line arguments to get the username
-var events = await gitHubApiService.GetEvents("hectorrosario22");
-printService.PrintEvents(events);
+string? username;
+while (true)
+{
+    Console.Write("Enter GitHub username: ");
+    username = Console.ReadLine();
+    if (string.IsNullOrWhiteSpace(username))
+    {
+        Console.WriteLine("Username cannot be empty.");
+        continue;
+    }
+
+    break;
+}
+
+var eventsResult = await gitHubApiService.GetEvents(username);
+if (!eventsResult.IsSuccess)
+{
+    Console.WriteLine(eventsResult.ErrorMessage);
+    return;
+}
+
+printService.PrintEvents(eventsResult.Value!);
 
 static ServiceProvider BuildServiceProvider()
 {
