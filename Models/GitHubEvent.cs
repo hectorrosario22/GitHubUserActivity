@@ -37,7 +37,7 @@ public record GitHubEvent
             GitHubEventType.PullRequestReviewThreadEvent => $"- {Payload?.Deserialize<GitHubPullRequestReviewThreadEventPayload>()?.ToString(this)}",
             GitHubEventType.PushEvent => $"- {Payload?.Deserialize<GitHubPushEventPayload>()?.ToString(this)}",
             GitHubEventType.ReleaseEvent => $"- Released a new version in '{Repository.Name}'",
-            // Sponsorchip Event??
+            GitHubEventType.SponsorshipEvent => "- Received a sponsorship",
             GitHubEventType.WatchEvent => $"- Starred '{Repository.Name}'",
             _ => $"- Unknown event '{Type}' in '{Repository.Name}'",
         };
