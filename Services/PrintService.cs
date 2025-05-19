@@ -61,6 +61,9 @@ public class PrintService : IPrintService
                 case GitHubEventType.PushEvent:
                     PrintPushEvent(gitHubEvent);
                     break;
+                case GitHubEventType.ReleaseEvent:
+                    PrintReleaseEvent(gitHubEvent);
+                    break;
                 case GitHubEventType.WatchEvent:
                     PrintWatchEvent(gitHubEvent);
                     break;
@@ -224,6 +227,11 @@ public class PrintService : IPrintService
 
         var commitLabel = payload.Size == 1 ? "commit" : "commits";
         Console.WriteLine($"- Pushed {payload.Size} {commitLabel} to '{gitHubEvent.Repository.Name}'");
+    }
+
+    private static void PrintReleaseEvent(GitHubEvent gitHubEvent)
+    {
+        Console.WriteLine($"- Created a release in '{gitHubEvent.Repository.Name}'");
     }
 
     private static void PrintPullRequestEvent(GitHubEvent gitHubEvent)

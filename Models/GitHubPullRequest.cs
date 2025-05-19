@@ -5,5 +5,5 @@ namespace GitHubUserActivity.Models;
 public record GitHubPullRequest
 {
     [JsonPropertyName("number")]
-    public required long Number { get; init; }
+    public long Number { get; init; }
 }
